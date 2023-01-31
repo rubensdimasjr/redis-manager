@@ -1,0 +1,20 @@
+{
+    "name": "rubensdimas/redis-manager",
+    "description": "Repositorio simples de impletacao redis com single design pattern",
+    "type": "library",
+    "require": {
+        "predis/predis": "^2.1"
+    },
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Rubensdimas\\RedisManager\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Rubens Dimas Jr",
+            "email": "rubens.jr107@gmail.com"
+        }
+    ]
+}
