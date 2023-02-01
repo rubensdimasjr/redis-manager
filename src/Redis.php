@@ -81,6 +81,11 @@ class Redis {
     return $cachedEntry;
   }
 
+  /**
+   * Método responsável por retornar todos os dados do cache baseados em sua key
+   * @param string $key
+   * @return array|null
+   */
   public function getAll($key){
     $cachedEntry = $this->getConnection()->hgetall($key);
     $temp = [];
@@ -96,10 +101,18 @@ class Redis {
     return null;
   }
 
-
-  public function insert($key, $field, $values){
+  /**
+   * Método responsável por inserir dados no cache baseados por uma chave, um campo, os dados e um tempo de expiração
+   * @param string $key
+   * @param string $field
+   * @param array $values
+   * @param int $time_expire
+   * @return void
+   */
+  public function insert($key, $field, $values, $time_expire){
     try{
       $this->getConnection()->hset($key, $field, json_encode($values, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+      $this->getConnection()->expire($key, $time_expire);
     }catch(\Predis\Client $e){
       echo "Error: ".$e->getMessage();
     }
