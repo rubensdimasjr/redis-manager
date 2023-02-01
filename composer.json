@@ -16,5 +16,6 @@
             "name": "Rubens Dimas Jr",
             "email": "rubens.jr107@gmail.com"
         }
-    ]
+    ],
+    "minimum-stability": "dev"
 }
