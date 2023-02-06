@@ -2,14 +2,15 @@
 
 namespace Rubensdimas\RedisManager;
 
-class Redis {
+class Redis
+{
 
   /**
    * Conexão com o Redis
    * @var RedisConnect
    */
   private $connection;
-  
+
   public function __construct()
   {
     $this->setConnection(RedisConnect::getRedisConnection());
@@ -19,7 +20,8 @@ class Redis {
    * Método responsável por setar uma conexão com o Redis
    * @param RedisConnect
    */
-  public function setConnection($connection){
+  public function setConnection($connection)
+  {
     $this->connection = $connection;
   }
 
@@ -27,7 +29,8 @@ class Redis {
    * Método responsável por retornar uma conexão com o redis
    * @return \Predis\Client
    */
-  public function getConnection(){
+  public function getConnection()
+  {
     return $this->connection;
   }
 
@@ -37,11 +40,12 @@ class Redis {
    * @param string $field
    * @return bool
    */
-  public function delete($key, $field){
-    try{
-      $this->getConnection()->hdel($key,$field);
-    }catch(\Predis\Client $e){
-      echo "Error: ".$e->getMessage();
+  public function delete($key, $field)
+  {
+    try {
+      $this->getConnection()->hdel($key, $field);
+    } catch (\Predis\Client $e) {
+      echo "Error: " . $e->getMessage();
     }
 
     return true;
@@ -54,14 +58,18 @@ class Redis {
    * @param array $values
    * @return bool
    */
-  public function edit($key, $field, $values){
-    try{
-      $this->getConnection()->hdel($key,[$field]);
-      $this->getConnection()->hset($key, $field, json_encode($values, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-    }catch(\Predis\Client $e){
-      echo "Error: ".$e->getMessage();
+  public function edit($key, $field, $values)
+  {
+    try {
+      if ($this->getConnection()->hexists($key, $field) == 1) {
+        $this->getConnection()->hdel($key, [$field]);
+        $this->getConnection()->hset($key, $field, json_encode($values, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $this->getConnection()->expire($key, 10);
+      }
+    } catch (\Predis\Client $e) {
+      echo "Error: " . $e->getMessage();
     }
-  
+
     return true;
   }
 
@@ -71,10 +79,11 @@ class Redis {
    * @param string $field
    * @return array|null
    */
-  public function getByKeyAndField($key, $field){
+  public function getByKeyAndField($key, $field)
+  {
     $cachedEntry = $this->getConnection()->hget($key, $field);
 
-    if($cachedEntry){
+    if ($cachedEntry) {
       return json_decode($cachedEntry, true);
     }
 
@@ -86,13 +95,14 @@ class Redis {
    * @param string $key
    * @return array|null
    */
-  public function getAll($key){
+  public function getAll($key)
+  {
     $cachedEntry = $this->getConnection()->hgetall($key);
     $temp = [];
 
-    if($cachedEntry){
-      foreach($cachedEntry as $hash => $field){
-        $temp[] = json_decode($cachedEntry[$hash],true);
+    if ($cachedEntry) {
+      foreach ($cachedEntry as $hash => $field) {
+        $temp[] = json_decode($cachedEntry[$hash], true);
       }
 
       return $temp;
@@ -109,13 +119,13 @@ class Redis {
    * @param int $time_expire
    * @return void
    */
-  public function insert($key, $field, $values, $time_expire){
-    try{
+  public function insert($key, $field, $values)
+  {
+    try {
       $this->getConnection()->hset($key, $field, json_encode($values, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-      $this->getConnection()->expire($key, $time_expire);
-    }catch(\Predis\Client $e){
-      echo "Error: ".$e->getMessage();
+      $this->getConnection()->expire($key, 10);
+    } catch (\Predis\Client $e) {
+      echo "Error: " . $e->getMessage();
     }
   }
-  
 }
